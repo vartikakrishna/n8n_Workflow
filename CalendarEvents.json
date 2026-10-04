@@ -1,0 +1,180 @@
+{
+  "name": "CalendarEvents",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "f7b72638-73c8-4913-b7c2-2b95ce27ffa5",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Agent instructions: Look at my events/meetings for the day and send me an email to vartikakrishna28@gmail.com on the top two most important events of the day and tell me why. Look at the event title, description, attendees to find this out.\n",
+        "options": {
+          "systemMessage": "Look at my events/meetings for the day and send me an email to vartikakrishna28@gmail.com on the top two most important events of the day and tell me why. Look at the event title, description, attendees to find this out. First fetch the events for today once, then send exactly one email using the Send email tool. If there are no events today, send a short email saying so. Keep your response concise."
+        }
+      },
+      "id": "435e42c5-2176-441e-8077-8bae314b7101",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "maxTokensToSample": 800
+        }
+      },
+      "id": "053922d1-1a77-448d-8221-9a90b5701460",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        96,
+        208
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "UXQckf4h4wfuzona",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "vartikakrishna28@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', `Email subject line`, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', `Email body with the top two events of the day and why they matter`, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "437c18cc-6988-4173-a615-4e592bb15cb3",
+      "name": "Send email in Gmail",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        208
+      ],
+      "webhookId": "15779bdd-8887-4856-a7e8-bf764f2dab72",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zP9lDMsBrYdkpfvZ",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "vartikakrishna28@gmail.com",
+          "mode": "list",
+          "cachedResultName": "vartikakrishna28@gmail.com"
+        },
+        "returnAll": true,
+        "timeMin": "={{ $now.startOf(\"day\") }}",
+        "timeMax": "={{ $now.endOf(\"day\") }}",
+        "options": {
+          "orderBy": "startTime"
+        }
+      },
+      "id": "dc280e39-1e07-4d8d-85b3-35a159644a79",
+      "name": "Get many events in Google Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        512,
+        176
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ItDCkGYj8rx8HJ9o",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "de296731-f66a-48c6-8493-2c205dcb9abe",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b32d77a10516d63f1501de2ddcfbca740383d3d369901f6a1aaed2c4607b71ea"
+  },
+  "nodeGroups": [],
+  "id": "i55wWwSsk0b837YC",
+  "tags": []
+}
